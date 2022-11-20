@@ -1,19 +1,27 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
-
+const fs = require('fs')
+const path = require('path')
 const baseUrl = "https://coinmarketcap.com"
 
 async function main() {
-    const coinList = await getTopCoins(10)
+    const coinList = await getTopCoins()
     await getWatchlists(coinList)
 }
 
 async function getTopCoins() {
     const html = await getHtml(baseUrl)
+    //await dumpToFile(html, "dumps", "topcoins.html")
     const $= cheerio.load(html);
     const coinList = []
-    const coinItems= $(".eVOXbZ .LCOyB a");
-    coinItems.each((index, data) => {
+    //Elementi visualizzati al load
+    const topCoinItems= $(".eVOXbZ .LCOyB a");
+    topCoinItems.each((index, data) => {
+        coinList.push($(data).attr('href'))
+    })
+    //elementi trasformati man mano che si scrolla (l'anchor è già caricato)
+    const lazyCoinItems= $(".eVOXbZ .bKFMfg a");
+    lazyCoinItems.each((index, data) => {
         coinList.push($(data).attr('href'))
     })
     return coinList
@@ -34,9 +42,16 @@ async function getWatchlists(coinList){
     }
 }
 
+async function dumpToFile(data, dir, file){
+    const dump = data //JSON.stringify(data, null, "\t")
+    return new Promise((resolve, reject) => {
+        const dumpPath = path.resolve(__dirname, dir, file)
+        fs.writeFile(dumpPath, dump, 'utf8', resolve)
+    })
+}
+
 async function getHtml(url){
     try {
-
         return (await axios.get(url)).data
     } catch(e) {
         console.log("errore axios: " + e);
@@ -44,4 +59,4 @@ async function getHtml(url){
     return undefined
 }
 
-main().catch(e => console.error)
+main().catch(console.error)
