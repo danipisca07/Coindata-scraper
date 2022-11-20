@@ -33,19 +33,30 @@ async function getTopCoins(limit, page = 1) {
     return coinList.slice(0, limit)
 }
 
-async function getWatchlists(coinList){
-    for(let i = 0; i < coinList.length; i++) {
-        const coinPath = coinList[i]
-        const html = await getHtml(baseUrl + coinPath)
-        const $= cheerio.load(html);
-
-        const datarow= $(".cevGxl > .namePill:last-of-type");
-        datarow.each((index, data) => {
-            const item= $(data).text();
-            const num = new Number(item.replace(/\D/g,''));
-            console.log(`${coinPath} on ${num} watchlists`)
+async function getCoinInfo(coinList){
+    var progress = 0
+    var promises = coinList.map((coinPath) => {
+        return new Promise(async (res, rej) => {
+            const html = await getHtml(baseUrl + coinPath)
+            const $= cheerio.load(html);
+            const rankItem = $(".cevGxl > .namePillPrimary").first().text();
+            const rank = new Number(rankItem.replace(/\D/g,''));
+            const watchlistItem= $(".cevGxl > .namePill:last-of-type").first().text();
+            const watchlist = new Number(watchlistItem.replace(/\D/g,''));
+            res({
+                coin: coinPath,
+                rank,
+                watchlist
+            })
+        }).then((res) => {
+            progress++
+            return res
         })
-    }
+    })
+    var interval = setInterval(() => console.log(progress + " / " + promises.length), 1000)
+    var res = await Promise.all(promises)
+    clearInterval(interval)
+    return res
 }
 
 async function dumpToFile(data, dir, file){
