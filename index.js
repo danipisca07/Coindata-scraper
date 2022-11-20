@@ -1,12 +1,16 @@
+require('dotenv').config()
 const axios = require('axios')
 const cheerio = require('cheerio')
 const fs = require('fs')
 const path = require('path')
+const MongoClient = require('mongodb').MongoClient;
 const baseUrl = "https://coinmarketcap.com"
+const coinDataCollection = "CoinData"
 
 async function main() {
     const coinList = await getTopCoins(200)
-    await getWatchlists(coinList)
+    const res = await getCoinInfo(coinList)
+    await storeCoinData(res)
 }
 
 async function getTopCoins(limit, page = 1) {
@@ -40,13 +44,15 @@ async function getCoinInfo(coinList){
             const html = await getHtml(baseUrl + coinPath)
             const $= cheerio.load(html);
             const rankItem = $(".cevGxl > .namePillPrimary").first().text();
-            const rank = new Number(rankItem.replace(/\D/g,''));
+            const rank = parseInt(rankItem.replace(/\D/g,''));
             const watchlistItem= $(".cevGxl > .namePill:last-of-type").first().text();
-            const watchlist = new Number(watchlistItem.replace(/\D/g,''));
+            const watchlist = parseInt(watchlistItem.replace(/\D/g,''));
             res({
                 coin: coinPath,
                 rank,
-                watchlist
+                watchlist,
+                partitionDate : partitionDate(),
+                date: new Date()
             })
         }).then((res) => {
             progress++
@@ -59,12 +65,44 @@ async function getCoinInfo(coinList){
     return res
 }
 
+async function storeCoinData(coinData){
+    try {
+        const db = await MongoClient.connect(process.env.MONGO_CONNSTRING)
+        const coins = coinData.map(x => x.coin)
+        const clear = await db.db(process.env.MONGO_DB).collection(coinDataCollection).deleteMany({
+            partitionDate: partitionDate(), 
+            coin: {$in:coins}
+        })
+        if(clear?.deletedCount)
+            console.log("Overwriting " + clear.deletedCount)
+        const res = await db.db(process.env.MONGO_DB).collection(coinDataCollection).insertMany(coinData)
+        console.log("Inserted " + res.insertedCount)
+    } catch(e)
+    {
+        console.error(e)
+    }
+}
+
 async function dumpToFile(data, dir, file){
     const dump = data //JSON.stringify(data, null, "\t")
     return new Promise((resolve, reject) => {
         const dumpPath = path.resolve(__dirname, dir, file)
         fs.writeFile(dumpPath, dump, 'utf8', resolve)
     })
+}
+
+function partitionDate(date = undefined) {
+    var d = date ? new Date(date) : new Date(),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('');
 }
 
 async function getHtml(url){
