@@ -5,15 +5,15 @@ const path = require('path')
 const baseUrl = "https://coinmarketcap.com"
 
 async function main() {
-    const coinList = await getTopCoins()
+    const coinList = await getTopCoins(200)
     await getWatchlists(coinList)
 }
 
-async function getTopCoins() {
-    const html = await getHtml(baseUrl)
+async function getTopCoins(limit, page = 1) {
+    const html = await getHtml(baseUrl + "/?page=" + page)
     //await dumpToFile(html, "dumps", "topcoins.html")
     const $= cheerio.load(html);
-    const coinList = []
+    let coinList = []
     //Elementi visualizzati al load
     const topCoinItems= $(".eVOXbZ .LCOyB a");
     topCoinItems.each((index, data) => {
@@ -24,7 +24,13 @@ async function getTopCoins() {
     lazyCoinItems.each((index, data) => {
         coinList.push($(data).attr('href'))
     })
-    return coinList
+    if(limit == undefined)
+        return coinList
+    else if(coinList.length < limit) {
+        const nextPage = await getTopCoins(limit - coinList.length, ++page)
+        coinList = coinList.concat(nextPage)
+    }
+    return coinList.slice(0, limit)
 }
 
 async function getWatchlists(coinList){
