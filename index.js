@@ -40,20 +40,35 @@ async function getTopCoins(limit, page = 1) {
 async function getCoinInfo(coinList){
     var progress = 0
     var promises = coinList.map((coinPath) => {
-        return new Promise(async (res, rej) => {
+        return new Promise(async (resolve, rej) => {
             const html = await getHtml(baseUrl + coinPath)
             const $= cheerio.load(html);
             const rankItem = $(".cevGxl > .namePillPrimary").first().text();
             const rank = parseInt(rankItem.replace(/\D/g,''));
             const watchlistItem= $(".cevGxl > .namePill:last-of-type").first().text();
             const watchlist = parseInt(watchlistItem.replace(/\D/g,''));
-            res({
+            const marketCapItem= $(".statsContainer  .statsBlock:first-of-type .statsValue").first().text();
+            const marketCap = parseFloat(marketCapItem.replace(/\D/g,''));
+            const result = {
                 coin: coinPath,
                 rank,
                 watchlist,
                 partitionDate : partitionDate(),
-                date: new Date()
+                date: new Date(),
+                marketCap
+            }
+            const priceItems = $(".alternatePrices > .lgtBod")
+            priceItems.each((_, data) => {
+                const text = $(data).text()
+                if(text.match(/([^\s]*)\s/g)){
+                    const value = parseFloat(text.match(/([^\s]*)\s/g).find(_ => true))
+                    if(text.includes("BTC"))
+                        result.btcPrice = value
+                    else if(text.includes("ETH"))
+                        result.ethPrice = value
+                }
             })
+            resolve(result)
         }).then((res) => {
             progress++
             return res
