@@ -7,24 +7,35 @@ const MongoClient = require('mongodb').MongoClient;
 const baseUrl = "https://coinmarketcap.com"
 const coinDataCollection = "CoinData"
 
+const TOP_N_COINS = 1
+
 async function main() {
-    const coinList = await getTopCoins(200)
+    console.log("Retrieving top coins...\n")
+    const coinList = await getTopCoins(TOP_N_COINS)
+    console.log("Top " + TOP_N_COINS + " retrieved.")
+    console.log("Retrieving coins data...\n")
     const res = await getCoinInfo(coinList)
+    console.log("Done")
+    console.log("Storing on mongoDb...")
     await storeCoinData(res)
+    console.log("Done")
+    process.exit()
 }
 
 async function getTopCoins(limit, page = 1) {
+    terminalClearLastLine()
+    console.log("Getting page " + page + "...")
     const html = await getHtml(baseUrl + "/?page=" + page)
     //await dumpToFile(html, "dumps", "topcoins.html")
     const $= cheerio.load(html);
     let coinList = []
     //Elementi visualizzati al load
-    const topCoinItems= $(".eVOXbZ .LCOyB a");
+    const topCoinItems= $(".cmc-table .LCOyB a");
     topCoinItems.each((index, data) => {
         coinList.push($(data).attr('href'))
     })
     //elementi trasformati man mano che si scrolla (l'anchor è già caricato)
-    const lazyCoinItems= $(".eVOXbZ .bKFMfg a");
+    const lazyCoinItems= $(".cmc-table .bKFMfg a");
     lazyCoinItems.each((index, data) => {
         coinList.push($(data).attr('href'))
     })
@@ -74,7 +85,10 @@ async function getCoinInfo(coinList){
             return res
         })
     })
-    var interval = setInterval(() => console.log(progress + " / " + promises.length), 1000)
+    var interval = setInterval(() => {
+        terminalClearLastLine()
+        console.log(progress + " / " + promises.length)
+    }, 200)
     var res = await Promise.all(promises)
     clearInterval(interval)
     return res
@@ -128,5 +142,11 @@ async function getHtml(url){
     }
     return undefined
 }
+
+const terminalClearLastLine = () => {
+    process.stdout.moveCursor(0, -1) // up one line
+    process.stdout.clearLine(1) // from cursor to end
+  }
+  
 
 main().catch(console.error)
