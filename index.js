@@ -7,7 +7,7 @@ const MongoClient = require('mongodb').MongoClient;
 const baseUrl = "https://coinmarketcap.com"
 const coinDataCollection = "CoinData"
 
-const TOP_N_COINS = 5
+const TOP_N_COINS = 200
 
 async function main() {
     console.log("Retrieving top coins...\n")
@@ -63,8 +63,10 @@ async function getCoinInfo(coinList){
             const watchlist = parseInt(watchlistItem.replace(/\D/g,''));
             const marketCapItem= $(".statsContainer  .statsBlock:first-of-type .statsValue").first().text();
             const marketCap = parseFloat(marketCapItem.replace(/\D/g,''));
+            const coin = coinPath.replace("/currencies/", "").replace("/", "")
             const result = {
-                coin: coinPath,
+                coin,
+                coinPath,
                 rank,
                 watchlist,
                 partitionDate : partitionDate(),
