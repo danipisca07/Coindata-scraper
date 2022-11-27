@@ -1,10 +1,12 @@
-const express = require('express')
 require('dotenv').config()
+
+const express = require('express')
+const MongoClient = require('mongodb').MongoClient;
+
 const CoinDataDb = require('./storage/CoinData')
 const HistoryComparer = require('./lib/historyComparer')
-const MongoClient = require('mongodb').MongoClient;
-var db = {}
 
+var db = {}
 /** @type {CoinDataDb} */ var coinDataDb = undefined
 
 async function main() {

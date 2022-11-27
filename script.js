@@ -1,5 +1,4 @@
 require('dotenv').config()
-require('./lib/typedef')
 
 const MongoClient = require('mongodb').MongoClient;
 const { Table } = require('console-table-printer')
