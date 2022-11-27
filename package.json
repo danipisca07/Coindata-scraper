@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run-script": "node ./script.js",
+    "start-backend": "nodemon ./backend.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +14,10 @@
     "cheerio": "^1.0.0-rc.12",
     "console-table-printer": "^2.11.1",
     "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "mongodb": "^4.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
   }
 }

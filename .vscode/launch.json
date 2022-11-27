@@ -5,13 +5,32 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Launch backend",
             "request": "launch",
-            "name": "Launch Program",
+            "runtimeArgs": [
+                "run-script",
+                "start-backend"
+            ],
+            "runtimeExecutable": "npm",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\index.js"
+            "type": "node",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Launch script",
+            "request": "launch",
+            "runtimeArgs": [
+                "run-script",
+                "run-script"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "console": "integratedTerminal"
         }
     ]
 }
