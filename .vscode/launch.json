@@ -9,7 +9,7 @@
             "request": "launch",
             "runtimeArgs": [
                 "run-script",
-                "start-backend"
+                "backend"
             ],
             "runtimeExecutable": "npm",
             "skipFiles": [
@@ -23,7 +23,7 @@
             "request": "launch",
             "runtimeArgs": [
                 "run-script",
-                "run-script"
+                "script"
             ],
             "runtimeExecutable": "npm",
             "skipFiles": [

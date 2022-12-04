@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const express = require('express')
 const MongoClient = require('mongodb').MongoClient;
+const cors = require('cors')
 
 const CoinDataDb = require('./storage/CoinData')
 const HistoryComparer = require('./lib/historyComparer')
@@ -23,6 +24,7 @@ async function main() {
 }
 
 var app = express()
+app.use(cors)
 
 app.get('/', (req, res) => {
     res.send({ok: true})
