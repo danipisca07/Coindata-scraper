@@ -1,4 +1,5 @@
-require('dotenv').config()
+const path = require('path')
+require('dotenv').config({ path: __dirname + path.sep + ".env"})
 
 const MongoClient = require('mongodb').MongoClient;
 const { Table } = require('console-table-printer')
