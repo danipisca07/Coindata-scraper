@@ -43,4 +43,19 @@ app.get("/api/:coin", async function (req, res) {
     res.send(result)
 })
 
+app.get("/api/:coin/:property", async function (req, res) {
+    if(req.params.property !== "watchlist" && req.params.property !== "marketCap")
+        res.send("Prop not valid")
+
+    function filterProperty(el, propName){
+        return {
+            partitionDate: el.partitionDate,
+            date: el.date,
+            [propName]: el[propName] 
+        }
+    }
+    const result = await coinDataDb.getFullHistoryOfCoin(req.params.coin)
+    res.send(result.map(el => filterProperty(el, req.params.property)))
+})
+
 main().catch(console.error)

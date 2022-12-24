@@ -61,7 +61,7 @@ module.exports = class CoinDataDb {
      * @returns {Promise<CoinData[]>}
      */
     async getFullHistoryOfCoin (coin) {
-        return await this.collection.find({coin}).sort({partitionDate: -1}).toArray();
+        return await this.collection.find({coin}).sort({partitionDate: 1}).toArray();
     }
 
      /**
