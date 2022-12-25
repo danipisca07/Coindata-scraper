@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ path: __dirname + path.sep + ".env"})
 
 const express = require('express')
 const MongoClient = require('mongodb').MongoClient;
