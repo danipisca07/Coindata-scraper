@@ -41,6 +41,7 @@ app.get("/api/list", async function (req, res) {
 
 app.get("/api/:coin", async function (req, res) {
     const result = await coinDataDb.getFullHistoryOfCoin(req.params.coin)
+    HistoryComparer.addImproveToHistory(result, "watchlist")
     res.send(result)
 })
 
