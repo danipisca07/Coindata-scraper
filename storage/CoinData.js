@@ -21,7 +21,7 @@ module.exports = class CoinDataDb {
      * @returns {Promise<Number>}
      */
     async getLastPartitionDate() {
-        var query = await this.collection.find({}).sort({partitionDate: -1}).limit(1).toArray()
+        var query = await this.collection.find({}).sort({partitionDate: -1, rank: 1}).limit(1).toArray()
         return query[0].partitionDate
     }
 
